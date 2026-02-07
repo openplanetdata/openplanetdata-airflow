@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openplanetdata-airflow"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared Airflow infrastructure for OpenPlanetData workflows"
 readme = "README.md"
 license = "MIT"
@@ -21,11 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = [
-    "apache-airflow>=2.8.0",
-    "apache-airflow-providers-amazon>=8.0.0",
-    "kubernetes>=28.0.0",
-]
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
