@@ -2,7 +2,7 @@
 OpenPlanetData Airflow - Shared constants and defaults for Airflow workflows.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 from openplanetdata.airflow.defaults import (
     OPENPLANETDATA_IMAGE,
