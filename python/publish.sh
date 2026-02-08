@@ -23,6 +23,10 @@ fi
 sed -i "s/^version = \"$current_version\"/version = \"$new_version\"/" "$PYPROJECT"
 echo "Updated $PYPROJECT to version $new_version"
 
+git -C "$PROJECT_DIR" add "$PYPROJECT"
+git -C "$PROJECT_DIR" commit -m "Bump version to $new_version"
+git -C "$PROJECT_DIR" push
+
 rm -rf "$PROJECT_DIR/dist"
 python3 -m build "$PROJECT_DIR"
 twine upload "$PROJECT_DIR/dist/"*
