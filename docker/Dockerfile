@@ -8,11 +8,11 @@
 # Versions
 ARG AIRFLOW_VERSION=3.1.7
 ARG GOL_VERSION=2.2.3
+ARG OSMCOASTLINE_VERSION=2.5.0
 ARG PYTHON_VERSION=3.12
 
 # =============================================================================
-# Stage 1: Build GOL from source on Debian bookworm
-# Using same base as Airflow to ensure glibc compatibility
+# Stage 1: Build GOL from source
 # =============================================================================
 FROM debian:bookworm-slim AS gol-builder
 
@@ -45,7 +45,40 @@ RUN curl -fsSL "https://github.com/clarisma/geodesk-gol/archive/refs/tags/v${GOL
     && cp build/gol /usr/local/bin/gol
 
 # =============================================================================
-# Stage 2: Final image based on Airflow slim
+# Stage 2: Build osmcoastline from source
+# =============================================================================
+FROM debian:bookworm-slim AS osmcoastline-builder
+
+ARG OSMCOASTLINE_VERSION
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    cmake \
+    git \
+    libgdal-dev \
+    libgeos-dev \
+    liblz4-dev \
+    libosmium2-dev \
+    libprotozero-dev \
+    libspatialite-dev \
+    libsqlite3-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --branch v${OSMCOASTLINE_VERSION} --depth 1 \
+        https://github.com/osmcode/osmcoastline.git /tmp/osmcoastline \
+    && cmake -S /tmp/osmcoastline -B /tmp/osmcoastline/build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DWITH_LZ4=ON \
+    && cmake --build /tmp/osmcoastline/build -j$(nproc) \
+    && cmake --install /tmp/osmcoastline/build \
+    && rm -rf /tmp/osmcoastline
+
+# =============================================================================
+# Stage 3: Final image based on Airflow slim
 # =============================================================================
 FROM apache/airflow:slim-${AIRFLOW_VERSION}-python${PYTHON_VERSION}
 
@@ -58,15 +91,22 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install tools from Debian packages
+# Install tools and runtime dependencies from Debian packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    gdal-bin \
     jq \
+    libgeos-c1v5 \
+    liblz4-1 \
+    libspatialite7 \
     sqlite3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy GOL from builder
 COPY --from=gol-builder /usr/local/bin/gol /usr/local/bin/gol
+
+# Copy osmcoastline from builder
+COPY --from=osmcoastline-builder /usr/local/bin/osmcoastline* /usr/local/bin/
 
 USER airflow
 
