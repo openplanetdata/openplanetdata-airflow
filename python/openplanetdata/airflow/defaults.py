@@ -2,8 +2,8 @@
 Shared default constants for OpenPlanetData Airflow workflows.
 """
 
-ALERT_EMAIL = "airflow@openplanetdata.com"
 DOCKER_MOUNT = {"source": "/data/airflow", "target": "/data", "type": "bind"}
+EMAIL_ALERT_RECIPIENTS = ["airflow@openplanetdata.com"]
 OPENPLANETDATA_IMAGE = "openplanetdata/openplanetdata-airflow:latest"
 OPENPLANETDATA_SHARED_DIR = "/data/openplanetdata/shared"
 OPENPLANETDATA_WORK_DIR = "/data/openplanetdata"
