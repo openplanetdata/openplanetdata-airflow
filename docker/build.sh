@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build and optionally publish the OpenPlanetData Airflow worker image
+# Update versions, build and publish the OpenPlanetData Airflow worker image
 # Usage: ./build.sh [--push]
 #
 set -euo pipefail
@@ -24,37 +24,51 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Update Dockerfile versions to latest releases
+"$SCRIPT_DIR/update-versions.sh" --apply
+
 # Extract versions from Dockerfile
 AIRFLOW_VERSION=$(grep -E '^ARG AIRFLOW_VERSION=' "$SCRIPT_DIR/Dockerfile" | cut -d= -f2)
 GOL_VERSION=$(grep -E '^ARG GOL_VERSION=' "$SCRIPT_DIR/Dockerfile" | cut -d= -f2)
+OSMCOASTLINE_VERSION=$(grep -E '^ARG OSMCOASTLINE_VERSION=' "$SCRIPT_DIR/Dockerfile" | cut -d= -f2)
 PYTHON_VERSION=$(grep -E '^ARG PYTHON_VERSION=' "$SCRIPT_DIR/Dockerfile" | cut -d= -f2)
+GIT_SHA=$(git -C "$SCRIPT_DIR" rev-parse --short HEAD)
 
+VERSION_TAG="${AIRFLOW_VERSION}-${GIT_SHA}"
+
+echo ""
 echo "Building image with:"
 echo "  AIRFLOW_VERSION: $AIRFLOW_VERSION"
 echo "  GOL_VERSION: $GOL_VERSION"
+echo "  OSMCOASTLINE_VERSION: $OSMCOASTLINE_VERSION"
 echo "  PYTHON_VERSION: $PYTHON_VERSION"
+echo ""
+echo "Tags:"
+echo "  $IMAGE_NAME:$VERSION_TAG"
+echo "  $IMAGE_NAME:latest"
 echo ""
 
 # Build the image
 docker build \
     --build-arg AIRFLOW_VERSION="$AIRFLOW_VERSION" \
     --build-arg GOL_VERSION="$GOL_VERSION" \
+    --build-arg OSMCOASTLINE_VERSION="$OSMCOASTLINE_VERSION" \
     --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
+    -t "$IMAGE_NAME:$VERSION_TAG" \
     -t "$IMAGE_NAME:latest" \
-    -t "$IMAGE_NAME:$AIRFLOW_VERSION" \
     "$SCRIPT_DIR"
 
 echo ""
+echo "Built: $IMAGE_NAME:$VERSION_TAG"
 echo "Built: $IMAGE_NAME:latest"
-echo "Built: $IMAGE_NAME:$AIRFLOW_VERSION"
 
 # Push if requested
 if [[ "$PUSH" == "true" ]]; then
     echo ""
     echo "Pushing to Docker Hub..."
+    docker push "$IMAGE_NAME:$VERSION_TAG"
     docker push "$IMAGE_NAME:latest"
-    docker push "$IMAGE_NAME:$AIRFLOW_VERSION"
     echo ""
+    echo "Pushed: $IMAGE_NAME:$VERSION_TAG"
     echo "Pushed: $IMAGE_NAME:latest"
-    echo "Pushed: $IMAGE_NAME:$AIRFLOW_VERSION"
 fi

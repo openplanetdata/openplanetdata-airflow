@@ -27,11 +27,13 @@ done
 # Get current versions
 CURRENT_AIRFLOW=$(grep -E '^ARG AIRFLOW_VERSION=' "$DOCKERFILE" | cut -d= -f2)
 CURRENT_GOL=$(grep -E '^ARG GOL_VERSION=' "$DOCKERFILE" | cut -d= -f2)
+CURRENT_OSMCOASTLINE=$(grep -E '^ARG OSMCOASTLINE_VERSION=' "$DOCKERFILE" | cut -d= -f2)
 CURRENT_PYTHON=$(grep -E '^ARG PYTHON_VERSION=' "$DOCKERFILE" | cut -d= -f2)
 
 echo "Current versions:"
 echo "  AIRFLOW_VERSION: $CURRENT_AIRFLOW"
 echo "  GOL_VERSION: $CURRENT_GOL"
+echo "  OSMCOASTLINE_VERSION: $CURRENT_OSMCOASTLINE"
 echo "  PYTHON_VERSION: $CURRENT_PYTHON"
 echo ""
 
@@ -43,10 +45,14 @@ LATEST_AIRFLOW=$(curl -s https://api.github.com/repos/apache/airflow/releases \
 LATEST_GOL=$(curl -s https://api.github.com/repos/clarisma/geodesk-gol/releases/latest \
     | jq -r '.tag_name | ltrimstr("v")')
 
+LATEST_OSMCOASTLINE=$(curl -s https://api.github.com/repos/osmcode/osmcoastline/releases/latest \
+    | jq -r '.tag_name | ltrimstr("v")')
+
 echo ""
 echo "Latest versions:"
 echo "  AIRFLOW_VERSION: $LATEST_AIRFLOW"
 echo "  GOL_VERSION: $LATEST_GOL"
+echo "  OSMCOASTLINE_VERSION: $LATEST_OSMCOASTLINE"
 echo "  PYTHON_VERSION: $CURRENT_PYTHON (not auto-updated)"
 echo ""
 
@@ -58,6 +64,10 @@ if [[ "$CURRENT_AIRFLOW" != "$LATEST_AIRFLOW" ]]; then
 fi
 if [[ "$CURRENT_GOL" != "$LATEST_GOL" ]]; then
     echo "GOL: $CURRENT_GOL -> $LATEST_GOL"
+    UPDATES=true
+fi
+if [[ "$CURRENT_OSMCOASTLINE" != "$LATEST_OSMCOASTLINE" ]]; then
+    echo "osmcoastline: $CURRENT_OSMCOASTLINE -> $LATEST_OSMCOASTLINE"
     UPDATES=true
 fi
 
@@ -72,6 +82,7 @@ if [[ "$APPLY" == "true" ]]; then
     echo "Applying updates..."
     sed -i "s/^ARG AIRFLOW_VERSION=.*/ARG AIRFLOW_VERSION=$LATEST_AIRFLOW/" "$DOCKERFILE"
     sed -i "s/^ARG GOL_VERSION=.*/ARG GOL_VERSION=$LATEST_GOL/" "$DOCKERFILE"
+    sed -i "s/^ARG OSMCOASTLINE_VERSION=.*/ARG OSMCOASTLINE_VERSION=$LATEST_OSMCOASTLINE/" "$DOCKERFILE"
     echo "Updated $DOCKERFILE"
 else
     echo ""
