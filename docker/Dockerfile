@@ -93,6 +93,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install tools and runtime dependencies from Debian packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    aria2 \
     gdal-bin \
     jq \
     libgeos-c1v5 \
