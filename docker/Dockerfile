@@ -3,6 +3,7 @@
 # - osmcoastline: Coastline extraction from OSM PBF
 # - gol: OSM boundary queries
 # - GDAL/OGR: Geospatial format conversions (ogr2ogr, ogrinfo)
+# - pyosmium-up-to-date: OSM data update management
 # - Python with pyproj: Area calculations and metadata
 
 # Versions
@@ -100,6 +101,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     liblz4-1 \
     libspatialite7 \
     sqlite3 \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -119,6 +121,7 @@ RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" -r /requirem
 RUN gol --help \
     && ogr2ogr --version \
     && osmcoastline --version \
+    && pyosmium-up-to-date --help \
     && python -c "import pyproj; print(f'pyproj {pyproj.__version__}')"
 
 # Environment variables
