@@ -7,7 +7,7 @@
 # - Python with pyproj: Area calculations and metadata
 
 # Versions
-ARG AIRFLOW_VERSION=3.1.7
+ARG AIRFLOW_VERSION=3.1.8
 ARG GOL_VERSION=2.2.3
 ARG OSMCOASTLINE_VERSION=2.5.0
 ARG PYTHON_VERSION=3.12
