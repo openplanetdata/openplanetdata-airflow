@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 1.1.0)"
+        required: true
+        type: string
+      dry-run:
+        description: "Dry run (lint, test, build only — no commit, tag, release, or publish)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      VERSION: ${{ inputs.version }}
+      DRY_RUN: ${{ inputs.dry-run }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install build ruff pytest
+
+      - name: Bump version
+        run: sed -i "s/^version = .*/version = \"${VERSION}\"/" pyproject.toml
+
+      - name: Lint
+        run: ruff check python/
+
+      - name: Test
+        run: pytest
+
+      - name: Build
+        run: python -m build
+
+      - name: Commit version bump
+        if: env.DRY_RUN == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "Release v${VERSION}"
+          git push
+
+      - name: Tag
+        if: env.DRY_RUN == 'false'
+        run: |
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub release
+        if: env.DRY_RUN == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "v${VERSION}" --generate-notes
+
+      - name: Publish to PyPI
+        if: env.DRY_RUN == 'false'
+        uses: pypa/gh-action-pypi-publish@release/v1
