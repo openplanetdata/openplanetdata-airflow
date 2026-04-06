@@ -5,6 +5,7 @@ import shlex
 
 from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
+
 from openplanetdata.airflow.defaults import DOCKER_MOUNT, GDAL_FULL_IMAGE
 
 DOCKER_USER = f"{os.getuid()}:{os.getgid()}"
