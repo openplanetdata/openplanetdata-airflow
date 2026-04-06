@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openplanetdata-airflow"
-version = "1.0.0"
+version = "1.1.0"
 description = "Shared Airflow infrastructure for OpenPlanetData workflows"
 readme = "README.md"
 license = "MIT"
