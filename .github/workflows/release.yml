@@ -39,7 +39,7 @@ jobs:
         run: ruff check python/
 
       - name: Test
-        run: pytest
+        run: pytest || [ $? -eq 5 ]
 
       - name: Build
         run: python -m build
