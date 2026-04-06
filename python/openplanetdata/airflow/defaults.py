@@ -4,7 +4,8 @@ Shared default constants for OpenPlanetData Airflow workflows.
 
 DOCKER_MOUNT = {"source": "/data", "target": "/data", "type": "bind"}
 EMAIL_ALERT_RECIPIENTS = ["airflow@openplanetdata.com"]
-GDAL_IMAGE = "ghcr.io/osgeo/gdal:ubuntu-full-3.12.2"
+GDAL_FULL_IMAGE = "ghcr.io/osgeo/gdal:ubuntu-full-3.12.3"
+GDAL_SMALL_IMAGE = "ghcr.io/osgeo/gdal:ubuntu-small-3.12.3"
 OPENPLANETDATA_IMAGE = "openplanetdata/openplanetdata-airflow:latest"
 OPENPLANETDATA_SHARED_DIR = "/data/openplanetdata/shared"
 OPENPLANETDATA_WORK_DIR = "/data/openplanetdata"

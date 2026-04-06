@@ -45,7 +45,8 @@ The `openplanetdata.airflow.defaults` module provides shared constants:
 |---|---|
 | `DOCKER_MOUNT` | Bind mount configuration for `/data` |
 | `EMAIL_ALERT_RECIPIENTS` | Alert email recipients |
-| `GDAL_IMAGE` | GDAL Docker image reference |
+| `GDAL_FULL_IMAGE` | GDAL Docker image reference (ubuntu-full) |
+| `GDAL_SMALL_IMAGE` | GDAL Docker image reference (ubuntu-small) |
 | `OPENPLANETDATA_IMAGE` | OpenPlanetData worker Docker image |
 | `OPENPLANETDATA_SHARED_DIR` | Shared data directory path |
 | `OPENPLANETDATA_WORK_DIR` | Working directory path |

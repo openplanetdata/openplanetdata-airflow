@@ -5,7 +5,7 @@ import shlex
 
 from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
-from openplanetdata.airflow.defaults import DOCKER_MOUNT, GDAL_IMAGE
+from openplanetdata.airflow.defaults import DOCKER_MOUNT, GDAL_FULL_IMAGE
 
 DOCKER_USER = f"{os.getuid()}:{os.getgid()}"
 
@@ -24,7 +24,7 @@ class Ogr2OgrOperator(DockerOperator):
         self,
         *,
         args: list[str],
-        image: str = GDAL_IMAGE,
+        image: str = GDAL_FULL_IMAGE,
         **kwargs,
     ):
         self.args = args
