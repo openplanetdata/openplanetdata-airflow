@@ -3,10 +3,10 @@
 import os
 import shlex
 
-from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
-
 from openplanetdata.airflow.defaults import DOCKER_MOUNT, OPENPLANETDATA_IMAGE
+
+from airflow.providers.docker.operators.docker import DockerOperator
 
 DOCKER_USER = f"{os.getuid()}:{os.getgid()}"
 
