@@ -8,7 +8,7 @@
 
 # Versions
 ARG AIRFLOW_VERSION=3.3.0
-ARG GOL_VERSION=2.3.2
+ARG GOL_VERSION=2.3.3
 ARG OSMCOASTLINE_VERSION=2.5.0
 ARG PYTHON_VERSION=3.12
 
@@ -36,10 +36,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Source patches applied on top of the release tarball. Named
 # gol-<version>-*.patch so they are skipped automatically once GOL_VERSION
 # moves past a release that includes the fixes; remove them at that point.
-# - 0001: gol query -f pbf wrote southern-hemisphere anonymous way-nodes with
-#         lat + 214.7 degrees (clarisma/geodesk-gol#41, PR #42)
-# - 0002: gol build shifted root-tile nodes by 180 degrees when consecutive
-#         nodes were more than half a world apart (clarisma/geodesk-gol#43, PR #44)
+# - 0001: gol build shifted root-tile nodes by 180 degrees when consecutive
+#         nodes were more than half a world apart (clarisma/geodesk-gol#43);
+#         2.3.3 ships an ineffective fix (readVarint35 still shifts in 32 bits),
+#         so read the coordinate deltas as 64-bit varints instead
 COPY patches/ /tmp/gol-patches/
 
 # Build GOL with GCC 12 and C++20 compatibility flags

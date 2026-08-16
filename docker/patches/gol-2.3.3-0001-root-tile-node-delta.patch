@@ -1,15 +1,13 @@
-diff --git a/src/build/util/ProtoGolReader.h b/src/build/util/ProtoGolReader.h
-index 5856c43..5c8b0f3 100644
---- a/src/build/util/ProtoGolReader.h
-+++ b/src/build/util/ProtoGolReader.h
-@@ -110,10 +110,14 @@ protected:
+--- a/src/build/util/ProtoGolReader.h	2026-08-16 20:48:31.000000000 +0200
++++ b/src/build/util/ProtoGolReader.h	2026-08-16 21:06:02.124880727 +0200
+@@ -110,10 +110,14 @@
  			bool isTagged = (id & 1);
  			id = prevId + (id >> 1);
  			prevId = id;
 +			// Coordinate deltas are written as 64-bit signed varints and
 +			// need up to 33 bits (two nodes of the same pile can be up to
-+			// a full world apart in the root tile), so they must not be
-+			// read with the 32-bit variants (#43)
++			// a full world apart in the root tile); readVarint35() still
++			// truncates them to 32 bits (clarisma/geodesk-gol#43)
  			x = static_cast<int32_t>(
 -				static_cast<int64_t>(x) + readSignedVarint35(p));
 +				static_cast<int64_t>(x) + readSignedVarint64(p));
@@ -19,20 +17,18 @@ index 5856c43..5c8b0f3 100644
  			uint32_t tagsSize;
  			if (isTagged)
  			{
-@@ -201,8 +205,10 @@ protected:
+@@ -201,8 +205,8 @@
  				// Console::msg("read node/%lld after node/%lld (ok)",	id, prevId);
  			}
  			prevId = id;
--			xy.x += readSignedVarint32(p);
--			xy.y += readSignedVarint32(p);
-+			xy.x = static_cast<int32_t>(
-+				static_cast<int64_t>(xy.x) + readSignedVarint64(p));	// see #43
-+			xy.y = static_cast<int32_t>(
-+				static_cast<int64_t>(xy.y) + readSignedVarint64(p));
+-			xy.translateX(readSignedVarint35(p));
+-			xy.translateY(readSignedVarint35(p));
++			xy.translateX(readSignedVarint64(p));	// see #43
++			xy.translateY(readSignedVarint64(p));
  			self().foreignNode(id, xy, ref);
  		}
  	}
-@@ -226,8 +232,10 @@ protected:
+@@ -226,8 +230,10 @@
  			Box bounds;
  			if (hasBounds)
  			{
@@ -44,4 +40,4 @@ index 5856c43..5c8b0f3 100644
 +					static_cast<int64_t>(prevY) + readSignedVarint64(p));
  				bounds.setMinX(prevX);
  				bounds.setMinY(prevY);
- 				bounds.setMaxX(prevX + readVarint32(p));
+ 				bounds.setMaxX(static_cast<int32_t>(prevX + readVarint35(p)));
