@@ -8,7 +8,7 @@
 
 # Versions
 ARG AIRFLOW_VERSION=3.3.0
-ARG GOL_VERSION=2.3.3
+ARG GOL_VERSION=2.3.4
 ARG OSMCOASTLINE_VERSION=2.5.0
 ARG PYTHON_VERSION=3.12
 
@@ -30,28 +30,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     libssl-dev \
     ninja-build \
-    patch \
     && rm -rf /var/lib/apt/lists/*
-
-# Source patches applied on top of the release tarball. Named
-# gol-<version>-*.patch so they are skipped automatically once GOL_VERSION
-# moves past a release that includes the fixes; remove them at that point.
-# - 0001: gol build shifted root-tile nodes by 180 degrees when consecutive
-#         nodes were more than half a world apart (clarisma/geodesk-gol#43);
-#         2.3.3 ships an ineffective fix (readVarint35 still shifts in 32 bits),
-#         so read the coordinate deltas as 64-bit varints instead
-COPY patches/ /tmp/gol-patches/
 
 # Build GOL with GCC 12 and C++20 compatibility flags
 RUN curl -fsSL "https://github.com/clarisma/geodesk-gol/archive/refs/tags/v${GOL_VERSION}.tar.gz" \
        -o /tmp/gol.tar.gz \
     && tar -xzf /tmp/gol.tar.gz -C /tmp \
     && cd /tmp/geodesk-gol-${GOL_VERSION} \
-    && for p in /tmp/gol-patches/gol-${GOL_VERSION}-*.patch; do \
-         [ -e "$p" ] || continue; \
-         echo "Applying $(basename "$p")"; \
-         patch -p1 --forward < "$p"; \
-       done \
     && cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
        -DCMAKE_CXX_COMPILER=/usr/bin/g++-12 \
        -DCMAKE_CXX_FLAGS="--param=destructive-interference-size=64 -include optional -Wno-error -Wno-deprecated-declarations -Wno-invalid-offsetof" \
